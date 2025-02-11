@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  view-vector:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-02-11T18:30:43.383044776+05:30"
+    description: A Helm chart for Kubernetes
+    digest: cffdfc56e36d529dca04c01cfe28ae044f5ac451881b75093aae711341a8706d
+    name: view-vector
+    type: application
+    urls:
+    - https://github.com/cypik-view/view-vector-helm-chart.git/charts/view-vector-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-02-11T18:30:43.379991124+05:30"
