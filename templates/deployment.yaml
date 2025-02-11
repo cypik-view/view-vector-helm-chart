@@ -1,0 +1,58 @@
+# templates/deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: vector
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $key, $value := .Values.env }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+              subPath: view.json
+              readOnly: false
+            - name: data-volume
+              mountPath: /app/assets
+            - name: data-volume
+              mountPath: /app/logs
+            - name: data-volume
+              mountPath: /app/temp
+            - name: data-volume
+              mountPath: /app/webhookreq
+            - name: data-volume
+              mountPath: /app/webhookresp
+            - name: data-volume
+              mountPath: /app/controllog
+            - name: data-volume
+              mountPath: /app/controlapi
+            - name: data-volume
+              mountPath: /app/controltoken
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-config
+            items:
+            - key: view.json
+              path: view.json
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
