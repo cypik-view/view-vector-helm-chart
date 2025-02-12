@@ -1,5 +1,3 @@
-# templates/deployment.yaml
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,38 +19,28 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          {{- range $key, $value := .Values.env }}
-          - name: {{ $key }}
-            value: {{ $value | quote }}
-          {{- end }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
           volumeMounts:
-            - name: config-volume
-              mountPath: /app/config
-              subPath: view.json
-              readOnly: false
-            - name: data-volume
-              mountPath: /app/assets
-            - name: data-volume
-              mountPath: /app/logs
-            - name: data-volume
-              mountPath: /app/temp
-            - name: data-volume
-              mountPath: /app/webhookreq
-            - name: data-volume
-              mountPath: /app/webhookresp
-            - name: data-volume
-              mountPath: /app/controllog
-            - name: data-volume
-              mountPath: /app/controlapi
-            - name: data-volume
-              mountPath: /app/controltoken
+            - name: {{ .Values.volumeMounts.config.name }}
+              mountPath: {{ .Values.volumeMounts.config.mountPath }}
+              subPath: {{ .Values.volumeMounts.config.subPath }}
+              readOnly: {{ .Values.volumeMounts.config.readOnly }}
+            {{- if .Values.volumeMounts.data.paths }}
+            {{- range .Values.volumeMounts.data.paths }}
+            - name: {{ $.Values.volumeMounts.data.name }}
+              mountPath: {{ . }}
+            {{- end }}
+            {{- end }}
       volumes:
-        - name: config-volume
+        - name: {{ .Values.volumeMounts.config.name }}
           configMap:
             name: {{ .Release.Name }}-config
             items:
-            - key: view.json
-              path: view.json
-        - name: data-volume
+                - key: view.json
+                  path: view.json
+        - name: {{ .Values.volumeMounts.data.name }}
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-pvc

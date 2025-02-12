@@ -1,107 +1,54 @@
-# Default values for view-vector.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: viewio/view-vector
+  tag: v1.1.0
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Automatically mount a ServiceAccount's API credentials?
-  automount: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-podAnnotations: {}
-podLabels: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8311
+  targetPort: 8311
 
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+env:
+  VIEW_ACCOUNT_GUID: "cc47139e-fc27-4af2-9bfe-3551c0bda88d"
+  VIEW_DATABASE_TYPE: "Mysql"
+  VIEW_DATABASE_HOST: "mysql"
+  VIEW_DATABASE_PORT: 3306
+  VIEW_DATABASE_NAME: "view"
+  VIEW_DATABASE_USER: "root"
+  VIEW_DATABASE_PASS: "password"
+  VIEW_DATABASE_FILE: "view.db"
+  VIEW_CONSOLE_LOGGING: "1"
+  VIEW_CONTROL_HOSTNAME: "control.view.io"
+  VIEW_CONTROL_PORT: 8403
+  VIEW_CONTROL_SSL: true
+  VIEW_CONTROL_SWVERSION: "v1.0.0"
+  TERM: "xterm-256color"
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+pvc:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "standard"
+  resources:
+    requests:
+      storage: 1Gi
 
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-# Additional volumes on the output Deployment definition.
-volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
-
-# Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
-# - name: foo
-#   mountPath: "/etc/foo"
-#   readOnly: true
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+volumeMounts:
+  config:
+    name: config-volume
+    mountPath: /app/config
+    subPath: view.json
+    readOnly: false
+  data:
+    name: data-volume
+    paths:
+      - /app/assets
+      - /app/logs
+      - /app/temp
+      - /app/webhookreq
+      - /app/webhookresp
+      - /app/controllog
+      - /app/controlapi
+      - /app/controltoken
