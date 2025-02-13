@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Chart.Name }}
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Chart.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        app: {{ .Chart.Name }}
     spec:
       containers:
         - name: vector
@@ -37,10 +37,10 @@ spec:
       volumes:
         - name: {{ .Values.volumeMounts.config.name }}
           configMap:
-            name: {{ .Release.Name }}-config
+            name: {{ .Chart.Name }}-config
             items:
                 - key: view.json
                   path: view.json
         - name: {{ .Values.volumeMounts.data.name }}
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
+            claimName: {{ .Chart.Name }}-pvc
